@@ -4,7 +4,7 @@ Plugin Name: Mindvalley Comments Moderator
 Plugin URI: http://mindvalley.com/opensource
 Description: Create a custom role that enables only Comment Moderation actions and pages.
 Author: Mindvalley
-Version: 1.0.2
+Version: 1.0.3
 */
 
 class MV_Comment_Moderator {
@@ -45,12 +45,12 @@ class MV_Comment_Moderator {
 				$role->add_cap('edit_posts');
 				$role->add_cap('edit_published_posts');
 				$role->add_cap('edit_others_posts');
+				
+				// Flushing
+				global $current_user;
+				$current_user = '';
+				get_currentuserinfo();
 			}
-			
-			// Flushing
-			global $current_user;
-			$current_user = '';
-			get_currentuserinfo();
 		}
 	}
 	
