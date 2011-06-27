@@ -1,10 +1,10 @@
 <?php
 /*
 Plugin Name: Mindvalley Comments Moderator
-Plugin URI: http://mindvalley.com
+Plugin URI: http://mindvalley.com/opensource
 Description: Create a custom role that enables only Comment Moderation actions and pages.
 Author: Mindvalley
-Version: 1.0
+Version: 1.0.1
 */
 
 class MV_Comment_Moderator {
