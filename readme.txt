@@ -4,7 +4,7 @@ Donate link: http://www.mindvalley.com/opensource
 Tags: comment, moderator, moderation, user role
 Requires at least: 3.0.0
 Tested up to: 3.1.3
-Stable tag: 1.0
+Stable tag: 1.0.1
 
 Create a custom role that enables only Comment Moderation actions and pages.
 
