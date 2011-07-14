@@ -1,10 +1,10 @@
 <?php
 /*
 Plugin Name: Mindvalley Comments Moderator
-Plugin URI: http://mindvalley.com
+Plugin URI: http://mindvalley.com/opensource
 Description: Create a custom role that enables only Comment Moderation actions and pages.
 Author: Mindvalley
-Version: 1.0
+Version: 1.1
 */
 
 class MV_Comment_Moderator {
@@ -12,12 +12,23 @@ class MV_Comment_Moderator {
 		$this->add_role();
 		$this->add_cap();
 		add_action( 'admin_bar_menu', array(&$this, 'wp_admin_bar_comments_menu'), 50 );
-		add_action( 'admin_menu', array(&$this, 'admin_menu'));
-		add_action( 'admin_init', array(&$this, 'role_edit'));
+		
+
+		global $wp_version;
+		if(version_compare($wp_version,'3.2') == -1){
+			add_action( 'admin_menu', array(&$this, 'admin_menu_31'));
+			add_action( 'admin_init', array(&$this, 'role_edit_31'));
+		}else{
+			add_action( 'wp_dashboard_setup', array(&$this, 'wp_dashboard_setup'));
+			add_action( 'admin_menu', array(&$this, 'admin_menu'));
+			add_action( 'init', array(&$this, 'role_edit'));
+		}
 	}
 	
+	/* Backwards Compatibility */
 	
-	function admin_menu(){
+	// For WP 3.1.x
+	function admin_menu_31(){
 		if(!current_user_can( 'mv_moderate_comments' )) {
 			return;
 		}
@@ -25,16 +36,16 @@ class MV_Comment_Moderator {
 		$awaiting_mod = wp_count_comments();
 		$awaiting_mod = $awaiting_mod->moderated;
 		$awaiting_mod = $awaiting_mod ? "<span id='ab-awaiting-mod' class='pending-count'>" . number_format_i18n( $awaiting_mod ) . "</span>" : '';
-	
+		
 		add_submenu_page( 'edit-comments.php', sprintf( __('Comments %s'), $awaiting_mod ), 'Comments' , 'mv_moderate_comments','edit-comments.php');
-	
 	}
-	
-	function role_edit(){
+
+	function role_edit_31(){
+		
 		// Only do this when capabilities = mv_moderate_comments
 		if(current_user_can( 'mv_moderate_comments' )) {
 			global $pagenow;
-			
+
 			// Only allow access on edit-comments.php
 			if(	$pagenow == 'edit-comments.php' || 
 				$pagenow == 'comment.php' || 
@@ -45,11 +56,56 @@ class MV_Comment_Moderator {
 				$role->add_cap('edit_posts');
 				$role->add_cap('edit_published_posts');
 				$role->add_cap('edit_others_posts');
-			}else{
+			}
+			
+			// Flushing
+			global $current_user;
+			$current_user = '';
+			get_currentuserinfo();
+		}
+	}
+	
+	/* End Backwards Compatibility */
+
+	function wp_dashboard_setup(){
+		$screen = get_current_screen();
+		
+		remove_meta_box( 'dashboard_right_now', $screen->id, 'normal' );
+		remove_meta_box( 'dashboard_quick_press', $screen->id, 'side' );
+		remove_meta_box( 'dashboard_recent_drafts', $screen->id, 'side' );
+	}
+
+	function admin_menu(){
+		if(!current_user_can( 'mv_moderate_comments' )) {
+			return;
+		}
+		
+		$awaiting_mod = wp_count_comments();
+		$awaiting_mod = $awaiting_mod->moderated;
+		$awaiting_mod = $awaiting_mod ? "<span id='ab-awaiting-mod' class='pending-count'>" . number_format_i18n( $awaiting_mod ) . "</span>" : '';
+		
+		remove_menu_page( 'edit.php' );
+		remove_menu_page( 'tools.php' );
+	}
+	
+	function role_edit(){
+		
+		// Only do this when capabilities = mv_moderate_comments
+		if(current_user_can( 'mv_moderate_comments' )) {
+			global $pagenow;
+
+			// Only allow access on edit-comments.php
+			if(	$pagenow == 'index.php' ||
+				$pagenow == 'profile.php' ||
+				$pagenow == 'edit-comments.php' || 
+				$pagenow == 'comment.php' || 
+			   ($pagenow == 'admin-ajax.php' && (	$_POST['action'] == 'edit-comment' || 
+													$_POST['action'] == 'delete-comment' || 
+													$_POST['action'] == 'replyto-comment')) ){
 				$role = get_role('mv_comment_moderator');
-				$role->remove_cap('edit_posts');
-				$role->remove_cap('edit_published_posts');
-				$role->remove_cap('edit_others_posts');
+				$role->add_cap('edit_posts');
+				$role->add_cap('edit_published_posts');
+				$role->add_cap('edit_others_posts');
 			}
 			
 			// Flushing
