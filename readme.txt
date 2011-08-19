@@ -7,7 +7,7 @@ Tested up to: 3.2.1
 Stable tag: 1.1.1
 
 Create a custom role that enables only Comment Moderation actions and pages.
-
+ 
 
 == Description ==
 
