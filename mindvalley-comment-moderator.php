@@ -5,7 +5,7 @@ Plugin URI: http://mindvalley.com
 Description: Create a custom role that enables only Comment Moderation actions and pages.
 Author: MindValley
 Version: 1.1.2
-*/
+*/ 
 
 class MV_Comment_Moderator {
 	function __construct(){
