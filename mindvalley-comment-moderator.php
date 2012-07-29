@@ -1,10 +1,10 @@
 <?php
 /*
 Plugin Name: Mindvalley Comments Moderator
-Plugin URI: http://mindvalley.com/opensource
+Plugin URI: http://mindvalley.com
 Description: Create a custom role that enables only Comment Moderation actions and pages.
-Author: Mindvalley
-Version: 1.1
+Author: MindValley
+Version: 1.1.3
 */
 
 class MV_Comment_Moderator {
@@ -41,6 +41,10 @@ class MV_Comment_Moderator {
 	}
 
 	function role_edit_31(){
+		// Bypass for Multisite Super Admin, which will return true for any current_user_can()
+		if(is_multisite() && is_super_admin()){
+		  return true;
+		}
 		
 		// Only do this when capabilities = mv_moderate_comments
 		if(current_user_can( 'mv_moderate_comments' )) {
@@ -54,14 +58,18 @@ class MV_Comment_Moderator {
 													$_POST['action'] == 'replyto-comment')) ){
 				$role = get_role('mv_comment_moderator');
 				$role->add_cap('edit_posts');
+				$role->add_cap('edit_pages');
 				$role->add_cap('edit_published_posts');
+				$role->add_cap('edit_published_pages');
 				$role->add_cap('edit_others_posts');
+				$role->add_cap('edit_others_pages');
 			}
 			
 			// Flushing
 			global $current_user;
 			$current_user = '';
 			get_currentuserinfo();
+			
 		}
 	}
 	
@@ -88,7 +96,33 @@ class MV_Comment_Moderator {
 		remove_menu_page( 'tools.php' );
 	}
 	
+	function remove_menus(){
+		global $menu;
+		$restricted = array(__('Posts'), __('Media'), __('Links'), __('Pages'), __('Appearance'), __('Tools'), __('Users'), __('Settings'), __('Plugins'));
+		$post_types=get_post_types(null,'objects');
+		foreach($post_types as $pt){
+			if($pt->_builtin != 1){
+				$restricted[] = __($pt->labels->name);
+			}
+		}
+		end ($menu);
+		while (prev($menu)){
+			$value = explode(' ',$menu[key($menu)][0]);
+			if(in_array($value[0] != NULL?$value[0]:"" , $restricted)){unset($menu[key($menu)]);}
+		}
+	}
+	
+	function remove_bar_menus(){
+		global $wp_admin_bar;
+		$wp_admin_bar->remove_menu('new-content');
+	}
+	
 	function role_edit(){
+	  
+	  // Bypass for Multisite Super Admin, which will return true for any current_user_can()
+		if(is_multisite() && is_super_admin()){
+		  return true;
+		}
 		
 		// Only do this when capabilities = mv_moderate_comments
 		if(current_user_can( 'mv_moderate_comments' )) {
@@ -104,15 +138,23 @@ class MV_Comment_Moderator {
 													$_POST['action'] == 'replyto-comment')) ){
 				$role = get_role('mv_comment_moderator');
 				$role->add_cap('edit_posts');
+				$role->add_cap('edit_pages');
 				$role->add_cap('edit_published_posts');
+				$role->add_cap('edit_published_pages');
 				$role->add_cap('edit_others_posts');
+				$role->add_cap('edit_others_pages');
 			}
 			
 			// Flushing
 			global $current_user;
 			$current_user = '';
 			get_currentuserinfo();
+			
+			add_action( 'admin_menu', array(&$this, 'remove_menus'));
+			add_action( 'wp_before_admin_bar_render', array(&$this, 'remove_bar_menus'));
 		}
+		
+		
 	}
 	
 	function wp_admin_bar_comments_menu(){
@@ -145,3 +187,4 @@ class MV_Comment_Moderator {
 	}
 }
 new MV_Comment_Moderator();
+?>

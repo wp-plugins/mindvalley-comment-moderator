@@ -2,12 +2,12 @@
 Contributors: mindvalley
 Donate link: http://www.mindvalley.com/opensource
 Tags: comment, moderator, moderation, user role
-Requires at least: 3.0.0
-Tested up to: 3.2.1
-Stable tag: 1.1
+Requires at least: 3.1
+Tested up to: 3.4.1
+Stable tag: 1.1.3
 
 Create a custom role that enables only Comment Moderation actions and pages.
-
+ 
 
 == Description ==
 
@@ -42,3 +42,9 @@ Initial Release.
 
 = 1.1 =
 WP 3.2 compatibility.
+
+= 1.1.1 =
+Fix bugs.
+
+= 1.1.3 =
+Fix multisite bug.
